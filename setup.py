@@ -25,9 +25,9 @@ with open("requirements.txt", "r") as fh:
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
-
+# modified for local usage 
 setuptools.setup(
-    name="pyastar",
+    name="MDpyastar",
     version="0.0.1",
     author="Hendrik Weideman",
     author_email="hjweide@gmail.com",
