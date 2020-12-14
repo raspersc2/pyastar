@@ -1,3 +1,6 @@
+This is a custom fork that is optimized for Sc2 AI needs,  for the original project see [hjweide Original project](https://github.com/hjweide/pyastar/)
+
+
 [![Build Status](https://travis-ci.org/hjweide/pyastar.svg?branch=master)](https://travis-ci.org/hjweide/pyastar)
 [![Coverage Status](https://coveralls.io/repos/github/hjweide/pyastar/badge.svg?branch=master)](https://coveralls.io/github/hjweide/pyastar?branch=master)
 # PyAstar
