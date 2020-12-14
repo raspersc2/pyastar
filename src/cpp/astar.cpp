@@ -27,13 +27,13 @@ bool operator<(const Node &n1, const Node &n2) {
 // See for various grid heuristics:
 // http://theory.stanford.edu/~amitp/GameProgramming/Heuristics.html#S7
 // L_\inf norm (diagonal distance)
-inline float linf_norm(int i0, int j0, int i1, int j1) {
-  return std::max(std::abs(i0 - i1), std::abs(j0 - j1));
+inline float linf_norm(int x0, int y0, int x1, int y1) {
+  return std::max(std::abs(x0 - x1), std::abs(y0 - y1)) + 0.41421 * std::min(std::abs(x0 - x1), std::abs(y0 - y1));
 }
 
 // L_1 norm (manhattan distance)
-inline float l1_norm(int i0, int j0, int i1, int j1) {
-  return std::abs(i0 - i1) + std::abs(j0 - j1);
+inline float l1_norm(int x0, int y0, int x1, int y1) {
+  return std::abs(x0 - x1) + std::abs(y0 - y1);
 }
 
 
@@ -89,20 +89,26 @@ static PyObject *astar(PyObject *self, PyObject *args) {
     int row = cur.idx / w;
     int col = cur.idx % w;
     // check bounds and find up to eight neighbors: top to bottom, left to right
-    nbrs[0] = (diag_ok && row > 0 && col > 0)          ? cur.idx - w - 1   : -1;
-    nbrs[1] = (row > 0)                                ? cur.idx - w       : -1;
-    nbrs[2] = (diag_ok && row > 0 && col + 1 < w)      ? cur.idx - w + 1   : -1;
-    nbrs[3] = (col > 0)                                ? cur.idx - 1       : -1;
-    nbrs[4] = (col + 1 < w)                            ? cur.idx + 1       : -1;
+    nbrs[0] = (row > 0)                                ? cur.idx - w       : -1;
+    nbrs[1] = (col > 0)                                ? cur.idx - 1       : -1;
+    nbrs[2] = (col + 1 < w)                            ? cur.idx + 1       : -1;
+    nbrs[3] = (row + 1 < h)                            ? cur.idx + w       : -1;
+    nbrs[4] = (diag_ok && row > 0 && col > 0)          ? cur.idx - w - 1   : -1;
     nbrs[5] = (diag_ok && row + 1 < h && col > 0)      ? cur.idx + w - 1   : -1;
-    nbrs[6] = (row + 1 < h)                            ? cur.idx + w       : -1;
+    nbrs[6] = (diag_ok && row > 0 && col + 1 < w)      ? cur.idx - w + 1   : -1;
     nbrs[7] = (diag_ok && row + 1 < h && col + 1 < w ) ? cur.idx + w + 1   : -1;
 
     float heuristic_cost;
     for (int i = 0; i < 8; ++i) {
       if (nbrs[i] >= 0) {
         // the sum of the cost so far and the cost of this move
-        float new_cost = costs[cur.idx] + weights[nbrs[i]];
+        float new_cost = costs[cur.idx];
+        if (i < 4){
+            new_cost += weights[nbrs[i]];
+        }
+        else {
+            new_cost += weights[nbrs[i]] * 1.4142;
+        }
         if (new_cost < costs[nbrs[i]]) {
           // estimate the cost to the goal based on legal moves
           if (diag_ok) {
@@ -127,16 +133,17 @@ static PyObject *astar(PyObject *self, PyObject *args) {
 
   PyObject *return_val;
   if (path_length >= 0) {
+      
     npy_intp dims[2] = {path_length, 2};
     PyArrayObject* path = (PyArrayObject*) PyArray_SimpleNew(2, dims, NPY_INT32);
-    npy_int32 *iptr, *jptr;
+    npy_int32 *xptr, *yptr;
     int idx = goal;
     for (npy_intp i = dims[0] - 1; i >= 0; --i) {
-        iptr = (npy_int32*) (path->data + i * path->strides[0]);
-        jptr = (npy_int32*) (path->data + i * path->strides[0] + path->strides[1]);
+        xptr = (npy_int32*) (path->data + i * path->strides[0]);
+        yptr = (npy_int32*) (path->data + i * path->strides[0] + path->strides[1]);
 
-        *iptr = idx / w;
-        *jptr = idx % w;
+        *xptr = idx / w;
+        *yptr = idx % w;
 
         idx = paths[idx];
     }
