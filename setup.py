@@ -27,12 +27,12 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 # modified for local usage 
 setuptools.setup(
-    name="MDpyastar",
+    name="pyastar",
     version="0.0.1",
     author="Hendrik Weideman",
     author_email="hjweide@gmail.com",
     description=(
-        "A simple implementation of the A* algorithm for "
+        "A Modification of the original project for SC2 "
         "path-finding on a two-dimensional grid."),
     long_description=long_description,
     long_description_content_type="text/markdown",
